@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { MantineReactTable, type MRT_Row } from "mantine-react-table";
-import { Stack, Title, Alert } from "@mantine/core";
+import { Stack, Title, Alert, Text } from "@mantine/core";
 import { useSearchContext } from "../../context/SearchContext.tsx";
 import { validatePerson, Person } from "../../utils/PersonValidation.ts";
 import { v4 as uuidv4 } from "uuid";
 import { columns } from "./columns.ts";
 import RowActions from "./RowActions.tsx";
+import { modals } from "@mantine/modals";
 import {
   CreateRowModalContent,
   EditRowModalContent,
@@ -89,11 +90,25 @@ export default function PeoplePage() {
   };
 
   const handleDeleteRow = (row: MRT_Row<Person>) => {
-    setSearchResults((prev) => ({
-      ...prev,
-      people: prev.people.filter((person) => person.id !== row.original.id),
-    }));
+    modals.openConfirmModal({
+      title: "Delete Confirmation",
+      children: (
+        <Text>
+          Are you sure you want to delete {row.original.name}? This action
+          cannot be undone.
+        </Text>
+      ),
+      labels: { confirm: "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: () => {
+        setSearchResults((prev) => ({
+          ...prev,
+          people: prev.people.filter((person) => person.id !== row.original.id),
+        }));
+      },
+    });
   };
+  
 
   return (
     <Stack gap="xl" style={{ padding: "2rem" }}>
